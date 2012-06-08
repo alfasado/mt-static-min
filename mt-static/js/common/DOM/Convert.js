@@ -1,0 +1,4 @@
+extend(DOM,{detectHTML:function(html,filter){var e=document.createElement("div");e.innerHTML=html;DOM.mergeTextNodes(e);var ns=[];var proxy=new DOM.Proxy(e);do{var n=proxy.getNextNode();if(n.nodeType==Node.TEXT_NODE&&n.nodeValue.match(/<\/?[A-Za-z][A-Za-z0-9\-_]*[^>]*>/)){if(!filter||filter(n))
+return true;}}while(n&&n!=e);},convertHTML:function(html,filter){var e=document.createElement("div");e.innerHTML=html;DOM.mergeTextNodes(e);var ns=[];var proxy=new DOM.Proxy(e);do{var n=proxy.getNextNode();if(n.nodeType==Node.TEXT_NODE){if(!filter||filter(n))
+ns.push(n);}}while(n&&n!=e);var hs=[];for(var i=0;i<ns.length;i++){var n=ns[i];if(n.nodeValue.match(/<\/?[A-Za-z][A-Za-z0-9\-_]*[^>]*>/)){hs.push(n.nodeValue);n.nodeValue="$$HTML"+(hs.length-1)+"$$";}}
+return e.innerHTML.replace(/\$\$HTML(\d+)\$\$/g,function(m,n){return hs[finiteInt(n)]});}});

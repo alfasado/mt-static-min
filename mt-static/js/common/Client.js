@@ -1,0 +1,13 @@
+Client=new Class(Observable,{init:function(url,user,password){arguments.callee.applySuper(this,arguments);this.url=url;this.user=user;this.password=password;this.baseId="c"+Unique.id();this.count=0;},call:function(obj){return this.request(obj);},request:function(obj){obj.client=this;return new this.constructor.Request(obj);},getUniqueId:function(){return this.baseId+"r"+this.count++;}});Client.Request=new Class(Observable,{contentType:"text/javascript+json",init:function(obj){arguments.callee.applySuper(this,arguments);this.state="new";this.client=obj.client;this.method=obj.method||"default";this.params=obj.params||[];this.heap=obj.heap;this.id=defined(this.heap)?this.client.getUniqueId():null;this.asynchronous=this.heap?true:false;this.request={id:this.id,method:this.method,params:this.params};if(obj.delay){this.timer=new Timer(this.start.bind(this),obj.delay,1);}else
+this.start();},start:function(){this.timer=null;this.state="started";this.transport=new XMLHttpRequest();if(this.id!=null)
+this.transport.onreadystatechange=this.readyStateChange.bind(this);this.transport.open("POST",this.client.url,this.asynchronous,this.client.user,this.client.password);this.transport.setRequestHeader("content-type",this.contentType);this.transport.send(Object.toJSON(this.request));},stop:function(){this.state="stopped";this.heap=null;this.client=null;if(this.timer)
+this.timer.stop();if(this.transport)
+this.transport.abort();},readyStateChange:function(){if(this.transport.readyState!=4||this.state!="started")
+return;this.state="finished";this.response={id:this.id,result:null,error:null};try{if(this.transport.responseText.charAt(0)=="{"){try{this.response=eval("("+this.transport.responseText+")");}catch(e){this.response.error="error in eval/parse of responseText";}}else{this.response.error="Status: "+this.transport.status+" Error: Response not in JSON format";log.error(this.transport.responseText.encodeHTML());}}catch(e){if(e.message)
+e=e.message;this.response.error=e;}
+this.response.status=this.transport.status;if(this.heap&&this.heap.callback){if(this.processCallbacks(this.heap.callback))
+return;}
+this.heap=null;this.client=null;},processCallbacks:function(callbacks){if(callbacks instanceof Array){for(var i=0;i<callbacks.length;i++){callbacks[i](this.response,this.heap,this);}}else{callbacks(this.response,this.heap,this);}
+return false;},pause:function(){this.state="paused";if(this.timer)
+this.timer.pause();}});Client.simpleRequest=function(url,params,callback){url=url+(url.match(/\?/)?"&":"?")+String.encodeQuery(params);var transport=new XMLHttpRequest();transport.onreadystatechange=function(){if(transport.readyState!=4)
+return;callback(transport.responseText);};transport.open("GET",url,true);transport.send("");};

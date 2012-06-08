@@ -1,0 +1,10 @@
+Editor.Toolbar=new Class(Component,{CLASSNAME_ROOT:"editor-state-",initObject:function(element,editor){arguments.callee.applySuper(this,arguments);this.editor=editor;this.element.unselectable="on";},destroyObject:function(){this.editor=null;arguments.callee.applySuper(this,arguments);},eventMouseDown:function(event){event.stop();},eventClick:function(event){var command=this.getMouseEventCommand(event);if(command){switch(command){case"toggleMode":this.editor.toggleMode();this.editor.focus();break;case"setModeIframe":this.editor.setMode("iframe");this.editor.focus();break;case"setModeTextarea":this.editor.setMode("textarea");this.editor.focus();break;case"insertLink":var link=this.editor.getSelectedLink();if(link)
+this.editLink(link);else
+this.createLink();break;default:this.extendedCommand(command,event);}}
+return event.stop();},extendedCommand:function(command){this.editor.execCommand(command);},initLinkDataBagUrl:function(dataBag){if(!dataBag||!dataBag.url||!dataBag.url.trim())
+return null;dataBag.url=dataBag.url.trim();return dataBag;},createLink:function(url,textSelected,anchor){var linkedText="";if(!textSelected)
+textSelected=this.editor.isTextSelected();if(!url)
+url="http://";url=prompt(Editor.strings.enterLinkAddress,url);if(!url)
+return false;if(!textSelected)
+linkedText=prompt(Editor.strings.enterTextToLinkTo,"");this.insertLink({url:url,linkedText:linkedText,anchor:anchor});},editLink:function(linkElement){this.createLink(linkElement.getAttribute('href'),true,linkElement);},insertLink:function(dataBag){dataBag=this.initLinkDataBagUrl(dataBag);if(!dataBag)
+return;if(!dataBag.anchor){if(dataBag.linkedText){var id="temp_id_for_retrieving_inserted_element_"+Unique.id();var html="<a id='"+id+"'  href='"+dataBag.url+"'>"+dataBag.linkedText+"</a>";return this.editor.insertHTML(html,true,id,true);}else{return this.editor.execCommand("createLink",false,dataBag.url);}}else{dataBag.anchor.href=dataBag.url;return dataBag.anchor;}}});

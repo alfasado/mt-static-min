@@ -1,0 +1,17 @@
+SpellChecker=new Class(Observable,{SERVER_DELAY:500,MAX_PENDING_WORDS:100,init:function(){if(defined(this.words))
+return;arguments.callee.applySuper(this,arguments);this.words={};this.pendingWords=[];this.timer=null;},destroy:function(){if(this.timer)
+this.timer.stop();return arguments.callee.applySuper(this,arguments);},check:function(word){this.init();if(!defined(word))
+return;if(this.words.hasOwnProperty(word))
+return(this.words[word]instanceof Array)?SpellChecker.INVALID:this.words[word];var ignored=this.checkIgnore(word);if(defined(ignored))
+return ignored;this.pendingWords.push(word);this.words[word]=SpellChecker.PENDING;if(this.pendingWords.length>=this.MAX_PENDING_WORDS)
+this.getWords();else if(!this.timer)
+this.timer=new Timer(this.getIndirectMethod("getWords"),this.SERVER_DELAY);else
+this.timer.reset(this.SERVER_DELAY);return SpellChecker.PENDING;},checkIgnore:function(word){this.init();if(!defined(word))
+return;if(word.match(/^[+-]?(\d+|((\d*\.\d+)|(\d+\.\d*))+)$/))
+return this.ignore(word);},suggest:function(word){this.init();if(!defined(word))
+return[];if(this.words.hasOwnProperty(word)&&this.words[word]instanceof Array)
+return this.words[word];return[];},ignore:function(word){this.init();if(!defined(word))
+return;this.pendingWords.remove(word);return this.words[word]=SpellChecker.IGNORED;},getWords:function(){if(!this.pendingWords.length||this.request)
+return;if(!defined(this.i))
+this.i=0;for(var i=0;i<this.pendingWords.length;i++)
+this.words[this.pendingWords[i]]=this.i++%2;this.pendingWords=[];}});extend(SpellChecker,{PENDING:-2,IGNORED:-1,VALID:0,INVALID:1});

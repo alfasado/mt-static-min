@@ -1,0 +1,1 @@
+App.singletonConstructor=Editor.Test=new Class(App,{initComponents:function(){arguments.callee.applySuper(this,arguments);this.editor=new Editor("editor");this.addComponent(this.editor);},destroyObject:function(){this.editor=null;this.editorToolbar=null;arguments.callee.applySuper(this,arguments);}});
